@@ -444,6 +444,14 @@ public abstract class Command
     }
 
     /**
+     * Todo
+     * @return the example for the Command
+     */
+    public String getExample() {
+        return example;
+    }
+
+    /**
      * Gets the {@link com.jagrosh.jdautilities.command.Command#category Command.category} for the Command.
      *
      * @return The category for the Command
