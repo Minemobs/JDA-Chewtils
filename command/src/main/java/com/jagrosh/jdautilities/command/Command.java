@@ -79,6 +79,11 @@ public abstract class Command
      * and shown in the client for Slash Commands.
      */
     protected String help = "Aucune aide disponible.";
+
+    /**
+     * A small example
+     */
+    protected String example = "";
     
     /**
      * The {@link com.jagrosh.jdautilities.command.Command.Category Category} of the command.
