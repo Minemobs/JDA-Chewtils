@@ -78,14 +78,14 @@ public abstract class Command
      * A small help String that summarizes the function of the command, used in the default help builder,
      * and shown in the client for Slash Commands.
      */
-    protected String help = "no help available";
+    protected String help = "Aucune aide disponible.";
     
     /**
      * The {@link com.jagrosh.jdautilities.command.Command.Category Category} of the command.
      * <br>This can perform any other checks not completed by the default conditional fields.
      */
     protected Category category = null;
-    
+
     /**
      * An arguments format String for the command, used in the default help builder.
      * Not supported for SlashCommands.
@@ -176,13 +176,15 @@ public abstract class Command
      * The permission message used when the bot does not have the requires permission.
      * Requires 3 "%s", first is user mention, second is the permission needed, third is type, e.g. Guild.
      */
-    protected String botMissingPermMessage = "%s I need the %s permission in this %s!";
+    //protected String botMissingPermMessage = "%s I need the %s permission in this %s!";
+    protected final static String botMissingPermMessage = "%s J'ai besoin de la permission **%s** pour executer cette commande.";
 
     /**
      * The permission message used when the user does not have the requires permission.
      * Requires 3 "%s", first is user mention, second is the permission needed, third is type, e.g. Guild.
      */
-    protected String userMissingPermMessage = "%s You must have the %s permission in this %s to use that!";
+    //protected String userMissingPermMessage = "%s You must have the %s permission in this %s to use that!";
+    protected final static String userMissingPermMessage = "%s Vous avez besoin de la permission **%s** pour faire ça!";
     
     /**
      * The main body method of a {@link com.jagrosh.jdautilities.command.Command Command}.
@@ -319,7 +321,7 @@ public abstract class Command
         }
         else if(guildOnly)
         {
-            terminate(event, event.getClient().getError()+" This command cannot be used in direct messages");
+            terminate(event, event.getClient().getError()+" Cette commande ne peut pas être utilisée en messages privés.");
             return;
         }
         
@@ -600,7 +602,7 @@ public abstract class Command
     {
         if(remaining<=0)
             return null;
-        String front = event.getClient().getWarning()+" That command is on cooldown for "+remaining+" more seconds";
+        String front = event.getClient().getWarning()+" Vous devez attendre encore" + remaining + "secondes pour refaire cette commande";
         if(cooldownScope.equals(CooldownScope.USER))
             return front+"!";
         else if(cooldownScope.equals(CooldownScope.USER_GUILD) && event.getGuild()==null)

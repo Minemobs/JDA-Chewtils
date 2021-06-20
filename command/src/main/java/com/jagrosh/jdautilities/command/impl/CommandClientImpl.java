@@ -160,16 +160,17 @@ public class CommandClientImpl implements CommandClient, EventListener
         this.compiler = compiler;
         this.manager = manager;
         this.helpConsumer = helpConsumer==null ? (event) -> {
-                StringBuilder builder = new StringBuilder("**"+event.getSelfUser().getName()+"** commands:\n");
+                StringBuilder builder = new StringBuilder("Commandes de **"+event.getSelfUser().getName()+"** :\n");
                 Category category = null;
-                for(Command command : commands)
+                List<Command> botCommands = getCommands().stream().sorted(Comparator.comparing(o -> o.getCategory().getName())).collect(Collectors.toList());
+                for(Command command : botCommands)
                 {
                     if(!command.isHidden() && (!command.isOwnerCommand() || event.isOwner()))
                     {
                         if(!Objects.equals(category, command.getCategory()))
                         {
                             category = command.getCategory();
-                            builder.append("\n\n  __").append(category==null ? "No Category" : category.getName()).append("__:\n");
+                            builder.append("\n\n  __").append(category==null ? "Aucune catégorie" : category.getName()).append("__:\n");
                         }
                         builder.append("\n`").append(textPrefix).append(prefix==null?" ":"").append(command.getName())
                                .append(command.getArguments()==null ? "`" : " "+command.getArguments()+"`")
@@ -179,15 +180,15 @@ public class CommandClientImpl implements CommandClient, EventListener
                 User owner = event.getJDA().getUserById(ownerId);
                 if(owner!=null)
                 {
-                    builder.append("\n\nFor additional help, contact **").append(owner.getName()).append("**#").append(owner.getDiscriminator());
+                    builder.append("\n\nPour plus d'aide, contactez **").append(owner.getName()).append("**#").append(owner.getDiscriminator());
                     if(serverInvite!=null)
-                        builder.append(" or join ").append(serverInvite);
+                        builder.append(" ou rejoignez le discord ").append(serverInvite);
                 }
                 event.replyInDm(builder.toString(), unused ->
                 {
                     if(event.isFromType(ChannelType.TEXT))
                         event.reactSuccess();
-                }, t -> event.replyWarning("Help cannot be sent because you are blocking Direct Messages."));
+                }, t -> event.replyWarning("Aucune aide ne peut vous être envoyé car vous avez bloqué vos messages privés."));
         } : helpConsumer;
 
         // Load commands
