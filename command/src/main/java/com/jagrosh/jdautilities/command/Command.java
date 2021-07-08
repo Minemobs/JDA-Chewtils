@@ -221,7 +221,7 @@ public abstract class Command
                 helpBiConsumer.accept(event, this);
                 return;
             }
-            for(Command cmd: children)
+            for(Command cmd: getChildren())
             {
                 if(cmd.isCommandFor(parts[0]))
                 {
