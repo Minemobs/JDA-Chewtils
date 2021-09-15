@@ -308,6 +308,13 @@ public abstract class SlashCommand extends Command
                     }
                 }
             }
+
+            // nsfw check
+            if (nsfwOnly && !event.getTextChannel().isNSFW())
+            {
+                terminate(event, "This command may only be used in NSFW text channels!", client);
+                return;
+            }
         }
         else if(guildOnly)
         {
@@ -553,10 +560,12 @@ public abstract class SlashCommand extends Command
             // Add owner
             privileges.add(CommandPrivilege.enableUser(client.getOwnerId()));
             // Add co-owners
-            for (String user : client.getCoOwnerIds())
-                privileges.add(CommandPrivilege.enableUser(user));
+            if (client.getCoOwnerIds() != null)
+                for (String user : client.getCoOwnerIds())
+                    privileges.add(CommandPrivilege.enableUser(user));
         }
 
+        // can only have up to 10 privileges
         if (privileges.size() > 10)
             privileges = privileges.subList(0, 10);
 
