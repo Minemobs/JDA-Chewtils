@@ -15,6 +15,8 @@
  */
 package com.jagrosh.jdautilities.command;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -197,7 +199,7 @@ public abstract class Command
      * Requires 3 "%s", first is user mention, second is the permission needed, third is type, e.g. Guild.
      */
     //protected String userMissingPermMessage = "%s You must have the %s permission in this %s to use that!";
-    protected final static String userMissingPermMessage = "%s Vous avez besoin de la permission **%s** pour faire ça!";
+    protected final static String userMissingPermMessage = "error.permissions.userMissingPermMessage";
     
     /**
      * The main body method of a {@link com.jagrosh.jdautilities.command.Command Command}.
@@ -279,7 +281,7 @@ public abstract class Command
                 {
                     if(!event.getMember().hasPermission(event.getTextChannel(), p))
                     {
-                        terminate(event, String.format(userMissingPermMessage, event.getClient().getError(), p.getName(), "channel"));
+                        terminate(event, String.format(getTranslatedString(userMissingPermMessage, event), event.getClient().getError(), p.getName(), "channel"));
                         return;
                     }
                 }
@@ -287,7 +289,7 @@ public abstract class Command
                 {
                     if(!event.getMember().hasPermission(p))
                     {
-                        terminate(event, String.format(userMissingPermMessage, event.getClient().getError(), p.getName(), "server"));
+                        terminate(event, String.format(getTranslatedString(userMissingPermMessage, event), event.getClient().getError(), p.getName(), "server"));
                         return;
                     }
                 }
@@ -309,7 +311,7 @@ public abstract class Command
                         }
                         else if(!event.getSelfMember().hasPermission(vc, p))
                         {
-                            terminate(event, String.format(botMissingPermMessage, event.getClient().getError(), p.getName(), "voice channel"));
+                            terminate(event, String.format(getTranslatedString(botMissingPermMessage, event), event.getClient().getError(), p.getName(), "voice channel"));
                             return;
                         }
                     }
@@ -317,7 +319,7 @@ public abstract class Command
                     {
                         if(!event.getSelfMember().hasPermission(event.getTextChannel(), p))
                         {
-                            terminate(event, String.format(botMissingPermMessage, event.getClient().getError(), p.getName(), "channel"));
+                            terminate(event, String.format(getTranslatedString(botMissingPermMessage, event), event.getClient().getError(), p.getName(), "channel"));
                             return;
                         }
                     }
@@ -341,7 +343,7 @@ public abstract class Command
         }
         else if(guildOnly)
         {
-            terminate(event, event.getClient().getError()+" Cette commande ne peut pas être utilisée en messages privés.");
+            terminate(event, event.getClient().getError()+"" + getTranslatedString("error.permissions.notUsableInMP", event));
             return;
         }
         
@@ -630,7 +632,8 @@ public abstract class Command
     {
         if(remaining<=0)
             return null;
-        String front = event.getClient().getWarning()+" Vous devez attendre encore" + remaining + "secondes pour refaire cette commande";
+        String front = event.getClient().getWarning() + " " +
+            String.format(getTranslatedString("error.permissions.cooldownError", event), remaining);
         if(cooldownScope.equals(CooldownScope.USER))
             return front+"!";
         else if(cooldownScope.equals(CooldownScope.USER_GUILD) && event.getGuild()==null)
@@ -639,6 +642,17 @@ public abstract class Command
             return front+" "+CooldownScope.CHANNEL.errorSpecification+"!";
         else
             return front+" "+cooldownScope.errorSpecification+"!";
+    }
+
+    private String getTranslatedString(String key, CommandEvent e) {
+        try {
+            Class<?> clazz = Class.forName("fr.noalegeek.pepite_dor_bot.utils.MessageHelper");
+            Method m = clazz.getMethod("translateMessage", String.class, CommandEvent.class);
+            return (String) m.invoke(null, key, e);
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
+            ex.printStackTrace();
+            return key;
+        }
     }
 
     /**
