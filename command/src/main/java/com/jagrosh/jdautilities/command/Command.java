@@ -15,17 +15,18 @@
  */
 package com.jagrosh.jdautilities.command;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
+
+import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.GuildVoiceState;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 
 /**
  * <h1><b>Commands In JDA-Utilities</b></h1>
@@ -81,6 +82,8 @@ public abstract class Command
      * and shown in the client for Slash Commands.
      */
     protected String help = "Aucune aide disponible.";
+
+    private Class<?> messageHelper;
 
     /**
      * A small example
@@ -192,7 +195,7 @@ public abstract class Command
      * Requires 3 "%s", first is user mention, second is the permission needed, third is type, e.g. Guild.
      */
     //protected String botMissingPermMessage = "%s I need the %s permission in this %s!";
-    protected final static String botMissingPermMessage = "%s J'ai besoin de la permission **%s** pour executer cette commande.";
+    protected final static String botMissingPermMessage = "error.commands.botHasNotPermission";
 
     /**
      * The permission message used when the user does not have the requires permission.
@@ -245,7 +248,8 @@ public abstract class Command
         // owner check
         if(ownerCommand && !(event.isOwner()))
         {
-            terminate(event,null);
+            //terminate(event,null);
+            event.reply(isNotOwner(event));
             return;
         }
         
@@ -281,7 +285,8 @@ public abstract class Command
                 {
                     if(!event.getMember().hasPermission(event.getTextChannel(), p))
                     {
-                        terminate(event, String.format(getTranslatedString(userMissingPermMessage, event), event.getClient().getError(), p.getName(), "channel"));
+                        //terminate(event, String.format(getTranslatedString(userMissingPermMessage, event), event.getClient().getError(), p.getName(), "channel"));
+                        event.reply(getErrorMessage(event.getMember(), event, p));
                         return;
                     }
                 }
@@ -289,67 +294,57 @@ public abstract class Command
                 {
                     if(!event.getMember().hasPermission(p))
                     {
-                        terminate(event, String.format(getTranslatedString(userMissingPermMessage, event), event.getClient().getError(), p.getName(), "server"));
+                        //terminate(event, String.format(getTranslatedString(userMissingPermMessage, event), event.getClient().getError(), p.getName(), "server"));
+                        event.reply(getErrorMessage(event.getMember(), event, p));
                         return;
                     }
                 }
             }
 
             // bot perms
-            for(Permission p: botPermissions)
-            {
-                if(p.isChannel())
-                {
-                    if(p.name().startsWith("VOICE"))
-                    {
+            for(Permission p: botPermissions) {
+                if(p.isChannel()) {
+                    if(p.name().startsWith("VOICE")) {
                         GuildVoiceState gvc = event.getMember().getVoiceState();
                         VoiceChannel vc = gvc == null ? null : gvc.getChannel();
-                        if(vc==null)
-                        {
+                        if(vc == null) {
                             terminate(event, event.getClient().getError()+" You must be in a voice channel to use that!");
                             return;
-                        }
-                        else if(!event.getSelfMember().hasPermission(vc, p))
-                        {
-                            terminate(event, String.format(getTranslatedString(botMissingPermMessage, event), event.getClient().getError(), p.getName(), "voice channel"));
+                        } else if(!event.getSelfMember().hasPermission(vc, p)) {
+                            //terminate(event, String.format(getTranslatedString(botMissingPermMessage, event), event.getClient().getError(), p.getName(), "voice channel"));
+                            event.reply(getErrorMessage(event.getSelfMember(), event, p));
                             return;
                         }
                     }
                     else
                     {
-                        if(!event.getSelfMember().hasPermission(event.getTextChannel(), p))
-                        {
-                            terminate(event, String.format(getTranslatedString(botMissingPermMessage, event), event.getClient().getError(), p.getName(), "channel"));
+                        if(!event.getSelfMember().hasPermission(event.getTextChannel(), p)) {
+                            //terminate(event, String.format(getTranslatedString(botMissingPermMessage, event), event.getClient().getError(), p.getName(), "channel"));
+                            event.reply(getErrorMessage(event.getSelfMember(), event, p));
                             return;
                         }
                     }
-                }
-                else
-                {
-                    if(!event.getSelfMember().hasPermission(p))
-                    {
-                        terminate(event, String.format(botMissingPermMessage, event.getClient().getError(), p.getName(), "server"));
+                } else {
+                    if(!event.getSelfMember().hasPermission(p)) {
+                        //terminate(event, String.format(getTranslatedString(botMissingPermMessage, event), p.getName()));
+                        event.reply(getErrorMessage(event.getSelfMember(), event, p));
                         return;
                     }
                 }
             }
 
             // nsfw check
-            if (nsfwOnly && !event.getTextChannel().isNSFW())
-            {
+            if (nsfwOnly && !event.getTextChannel().isNSFW()) {
                 terminate(event, "This command may only be used in NSFW text channels!");
                 return;
             }
-        }
-        else if(guildOnly)
-        {
+        } else if(guildOnly) {
             terminate(event, event.getClient().getError()+"" + getTranslatedString("error.permissions.notUsableInMP", event));
             return;
         }
         
         // cooldown check, ignoring owner
-        if(cooldown>0 && !(event.isOwner()))
-        {
+        if(cooldown>0 && !(event.isOwner())) {
             String key = getCooldownKey(event);
             int remaining = event.getClient().getRemainingCooldown(key);
             if(remaining>0)
@@ -598,22 +593,21 @@ public abstract class Command
      */
     public String getCooldownKey(CommandEvent event)
     {
-        switch (cooldownScope)
-        {
-            case USER:         return cooldownScope.genKey(name,event.getAuthor().getIdLong());
-            case USER_GUILD:   return event.getGuild()!=null ? cooldownScope.genKey(name,event.getAuthor().getIdLong(),event.getGuild().getIdLong()) :
-                    CooldownScope.USER_CHANNEL.genKey(name,event.getAuthor().getIdLong(), event.getChannel().getIdLong());
-            case USER_CHANNEL: return cooldownScope.genKey(name,event.getAuthor().getIdLong(),event.getChannel().getIdLong());
-            case GUILD:        return event.getGuild()!=null ? cooldownScope.genKey(name,event.getGuild().getIdLong()) :
-                    CooldownScope.CHANNEL.genKey(name,event.getChannel().getIdLong());
-            case CHANNEL:      return cooldownScope.genKey(name,event.getChannel().getIdLong());
-            case SHARD:        return event.getJDA().getShardInfo()!=null ? cooldownScope.genKey(name, event.getJDA().getShardInfo().getShardId()) :
-                    CooldownScope.GLOBAL.genKey(name, 0);
-            case USER_SHARD:   return event.getJDA().getShardInfo()!=null ? cooldownScope.genKey(name,event.getAuthor().getIdLong(),event.getJDA().getShardInfo().getShardId()) :
-                    CooldownScope.USER.genKey(name, event.getAuthor().getIdLong());
-            case GLOBAL:       return cooldownScope.genKey(name, 0);
-            default:           return "";
-        }
+        return switch (cooldownScope) {
+            case USER -> cooldownScope.genKey(name, event.getAuthor().getIdLong());
+            case USER_GUILD -> event.getGuild() != null ? cooldownScope.genKey(name, event.getAuthor().getIdLong(), event.getGuild().getIdLong()) :
+                CooldownScope.USER_CHANNEL.genKey(name, event.getAuthor().getIdLong(), event.getChannel().getIdLong());
+            case USER_CHANNEL -> cooldownScope.genKey(name, event.getAuthor().getIdLong(), event.getChannel().getIdLong());
+            case GUILD -> event.getGuild() != null ? cooldownScope.genKey(name, event.getGuild().getIdLong()) :
+                CooldownScope.CHANNEL.genKey(name, event.getChannel().getIdLong());
+            case CHANNEL -> cooldownScope.genKey(name, event.getChannel().getIdLong());
+            case SHARD -> event.getJDA().getShardInfo() != null ? cooldownScope.genKey(name, event.getJDA().getShardInfo().getShardId()) :
+                CooldownScope.GLOBAL.genKey(name, 0);
+            case USER_SHARD -> event.getJDA().getShardInfo() != null ? cooldownScope.genKey(name, event.getAuthor().getIdLong(), event.getJDA().getShardInfo().getShardId()) :
+                CooldownScope.USER.genKey(name, event.getAuthor().getIdLong());
+            case GLOBAL -> cooldownScope.genKey(name, 0);
+            default -> "";
+        };
     }
 
     /**
@@ -647,12 +641,44 @@ public abstract class Command
     private String getTranslatedString(String key, CommandEvent e) {
         try {
             Class<?> clazz = Class.forName("fr.noalegeek.pepite_dor_bot.utils.MessageHelper");
+            if(messageHelper == null) messageHelper = clazz;
             Method m = clazz.getMethod("translateMessage", String.class, CommandEvent.class);
             return (String) m.invoke(null, key, e);
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
             ex.printStackTrace();
             return key;
         }
+    }
+
+    private MessageEmbed isNotOwner(CommandEvent event) {
+        try {
+            return new EmbedBuilder()
+                .setColor(Color.RED)
+                .setFooter((String) messageHelper.getMethod("getTag").invoke(null, event.getAuthor()), event.getAuthor().getAvatarUrl() == null ?
+                    event.getAuthor().getDefaultAvatarUrl() : event.getAuthor().getAvatarUrl())
+                .setTimestamp(Instant.now())
+                .setTitle(Class.forName("UnicodeCharcaters").getField("crossMarkEmoji").get(null) + " " + getTranslatedString("error.commands.notOwner", event)).build();
+        } catch (IllegalAccessException | NoSuchMethodException | NoSuchFieldException | ClassNotFoundException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private MessageEmbed getErrorMessage(Member member, CommandEvent event, Permission perm) {
+        try {
+            Method getTag = messageHelper.getMethod("getTag", User.class);
+            EmbedBuilder errorHasNotPermissionEmbed = new EmbedBuilder()
+                .setColor(Color.RED)
+                .setFooter((String) getTag.invoke(null, event.getAuthor()), event.getAuthor().getAvatarUrl() == null ? event.getAuthor().getDefaultAvatarUrl() :
+                    event.getAuthor().getAvatarUrl())
+                .setTimestamp(Instant.now())
+                .setTitle(member.getUser().isBot() ? getTranslatedString("error.commands.botHasNotPermission", event) :
+                    getTranslatedString("error.commands.userHasNotPermission", event), perm.getName());
+            return errorHasNotPermissionEmbed.build();
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -762,9 +788,8 @@ public abstract class Command
         @Override
         public boolean equals(Object obj)
         {
-            if(!(obj instanceof Category))
+            if(!(obj instanceof Category other))
                 return false;
-            Category other = (Category)obj;
             return Objects.equals(name, other.name) && Objects.equals(predicate, other.predicate) && Objects.equals(failResponse, other.failResponse);
         }
 
