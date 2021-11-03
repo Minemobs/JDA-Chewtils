@@ -232,6 +232,13 @@ public abstract class Command
      */
     public final void run(CommandEvent event)
     {
+        if(messageHelper == null) {
+            try {
+                messageHelper = Class.forName("fr.noalegeek.pepite_dor_bot.utils.MessageHelper");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
         // child check
         if(!event.getArgs().isEmpty())
         {
@@ -653,7 +660,6 @@ public abstract class Command
     private String getTranslatedString(String key, CommandEvent e) {
         try {
             Class<?> clazz = Class.forName("fr.noalegeek.pepite_dor_bot.utils.MessageHelper");
-            if(messageHelper == null) messageHelper = clazz;
             Method m = clazz.getMethod("translateMessage", String.class, CommandEvent.class);
             return (String) m.invoke(null, key, e);
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
