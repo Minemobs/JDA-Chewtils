@@ -666,7 +666,7 @@ public abstract class Command
         try {
             return new EmbedBuilder()
                 .setColor(Color.RED)
-                .setFooter((String) messageHelper.getMethod("getTag").invoke(null, event.getAuthor()), event.getAuthor().getAvatarUrl() == null ?
+                .setFooter((String) messageHelper.getMethod("getTag", User.class).invoke(null, event.getAuthor()), event.getAuthor().getAvatarUrl() == null ?
                     event.getAuthor().getDefaultAvatarUrl() : event.getAuthor().getAvatarUrl())
                 .setTimestamp(Instant.now())
                 .setTitle(Class.forName("UnicodeCharcaters").getField("crossMarkEmoji").get(null) + " " + getTranslatedString("error.commands.notOwner", event)).build();
