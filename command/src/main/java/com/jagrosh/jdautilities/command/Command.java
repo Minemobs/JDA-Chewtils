@@ -131,6 +131,13 @@ public abstract class Command
      * <br>Default {@code false}.
      */
     protected boolean ownerCommand = false;
+
+    /**
+     * {@code true} if the command may only be used by a User with an id matching the guild owner.
+     * <br/>
+     * <br/>Default {@code false}.
+     */
+    protected boolean guildOwnerCommand = false;
     
     /**
      * An {@code int} number of seconds users must wait before using this command again.
@@ -248,7 +255,11 @@ public abstract class Command
         // owner check
         if(ownerCommand && !(event.isOwner()))
         {
-            //terminate(event,null);
+            terminate(event,null);
+            return;
+        }
+
+        if(guildOwnerCommand && !event.getMember().isOwner()) {
             event.reply(isNotOwner(event));
             return;
         }
