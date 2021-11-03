@@ -593,21 +593,22 @@ public abstract class Command
      */
     public String getCooldownKey(CommandEvent event)
     {
-        return switch (cooldownScope) {
-            case USER -> cooldownScope.genKey(name, event.getAuthor().getIdLong());
-            case USER_GUILD -> event.getGuild() != null ? cooldownScope.genKey(name, event.getAuthor().getIdLong(), event.getGuild().getIdLong()) :
-                CooldownScope.USER_CHANNEL.genKey(name, event.getAuthor().getIdLong(), event.getChannel().getIdLong());
-            case USER_CHANNEL -> cooldownScope.genKey(name, event.getAuthor().getIdLong(), event.getChannel().getIdLong());
-            case GUILD -> event.getGuild() != null ? cooldownScope.genKey(name, event.getGuild().getIdLong()) :
-                CooldownScope.CHANNEL.genKey(name, event.getChannel().getIdLong());
-            case CHANNEL -> cooldownScope.genKey(name, event.getChannel().getIdLong());
-            case SHARD -> event.getJDA().getShardInfo() != null ? cooldownScope.genKey(name, event.getJDA().getShardInfo().getShardId()) :
-                CooldownScope.GLOBAL.genKey(name, 0);
-            case USER_SHARD -> event.getJDA().getShardInfo() != null ? cooldownScope.genKey(name, event.getAuthor().getIdLong(), event.getJDA().getShardInfo().getShardId()) :
-                CooldownScope.USER.genKey(name, event.getAuthor().getIdLong());
-            case GLOBAL -> cooldownScope.genKey(name, 0);
-            default -> "";
-        };
+        switch (cooldownScope)
+        {
+            case USER:         return cooldownScope.genKey(name,event.getAuthor().getIdLong());
+            case USER_GUILD:   return event.getGuild()!=null ? cooldownScope.genKey(name,event.getAuthor().getIdLong(),event.getGuild().getIdLong()) :
+                    CooldownScope.USER_CHANNEL.genKey(name,event.getAuthor().getIdLong(), event.getChannel().getIdLong());
+            case USER_CHANNEL: return cooldownScope.genKey(name,event.getAuthor().getIdLong(),event.getChannel().getIdLong());
+            case GUILD:        return event.getGuild()!=null ? cooldownScope.genKey(name,event.getGuild().getIdLong()) :
+                    CooldownScope.CHANNEL.genKey(name,event.getChannel().getIdLong());
+            case CHANNEL:      return cooldownScope.genKey(name,event.getChannel().getIdLong());
+            case SHARD:        return event.getJDA().getShardInfo()!=null ? cooldownScope.genKey(name, event.getJDA().getShardInfo().getShardId()) :
+                    CooldownScope.GLOBAL.genKey(name, 0);
+            case USER_SHARD:   return event.getJDA().getShardInfo()!=null ? cooldownScope.genKey(name,event.getAuthor().getIdLong(),event.getJDA().getShardInfo().getShardId()) :
+                    CooldownScope.USER.genKey(name, event.getAuthor().getIdLong());
+            case GLOBAL:       return cooldownScope.genKey(name, 0);
+            default:           return "";
+        }
     }
 
     /**
@@ -788,8 +789,9 @@ public abstract class Command
         @Override
         public boolean equals(Object obj)
         {
-            if(!(obj instanceof Category other))
+            if(!(obj instanceof Category))
                 return false;
+            Category other = (Category)obj;
             return Objects.equals(name, other.name) && Objects.equals(predicate, other.predicate) && Objects.equals(failResponse, other.failResponse);
         }
 
