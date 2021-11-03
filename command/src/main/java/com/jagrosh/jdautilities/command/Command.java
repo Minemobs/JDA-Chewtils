@@ -675,7 +675,7 @@ public abstract class Command
                 .setFooter((String) messageHelper.getMethod("getTag", User.class).invoke(null, event.getAuthor()), event.getAuthor().getAvatarUrl() == null ?
                     event.getAuthor().getDefaultAvatarUrl() : event.getAuthor().getAvatarUrl())
                 .setTimestamp(Instant.now())
-                .setTitle(Class.forName("UnicodeCharcaters").getField("crossMarkEmoji").get(null) + " " + getTranslatedString("error.commands.notOwner", event)).build();
+                .setTitle(Class.forName("fr.noalegeek.pepite_dor_bot.utils.UnicodeCharcaters").getField("crossMarkEmoji").get(null) + " " + getTranslatedString("error.commands.notOwner", event)).build();
         } catch (IllegalAccessException | NoSuchMethodException | NoSuchFieldException | ClassNotFoundException | InvocationTargetException e) {
             e.printStackTrace();
             return null;
