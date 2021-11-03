@@ -134,8 +134,8 @@ public abstract class Command
 
     /**
      * {@code true} if the command may only be used by a User with an id matching the guild owner.
-     * <br/>
-     * <br/>Default {@code false}.
+     * <br>
+     * Default {@code false}.
      */
     protected boolean guildOwnerCommand = false;
     
