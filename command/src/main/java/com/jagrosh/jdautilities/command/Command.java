@@ -155,7 +155,7 @@ public abstract class Command
      * <br>These are only checked in a {@link net.dv8tion.jda.api.entities.Guild Guild} environment.
      */
     protected Permission[] botPermissions = new Permission[0];
-    
+
     /**
      * The aliases of the command, when calling a command these function identically to calling the
      * {@link com.jagrosh.jdautilities.command.Command#name Command.name}.
@@ -266,6 +266,7 @@ public abstract class Command
             return;
         }
 
+        // guildOwner check
         if(guildOwnerCommand && !event.getMember().isOwner()) {
             event.reply(isNotOwner(event));
             return;
@@ -502,14 +503,24 @@ public abstract class Command
     }
 
     /**
-     * Checks if this Command can only be used in a {@link net.dv8tion.jda.api.entities.Guild Guild}.
+     * Checks if this command can only be used in a {@link net.dv8tion.jda.api.entities.Guild}.
      *
-     * @return {@code true} if this Command can only be used in a Guild, else {@code false} if it can
-     *         be used outside of one
+     * @return {@code true} if this command can only be used in a Guild, else {@code false} if it can
+     *         be used outside of one.
      */
     public boolean isGuildOnly()
     {
         return guildOnly;
+    }
+
+    /**
+     * Checks if this command can be only used by the owner of the {@link net.dv8tion.jda.api.entities.Guild}.
+     *
+     * @return {@code true} if this command can be only used by the owner of the Guild, else {@code false} if it can be used by anyone.
+     */
+    public boolean isGuildOwnerCommand()
+    {
+        return guildOwnerCommand;
     }
 
     /**
@@ -535,7 +546,7 @@ public abstract class Command
     /**
      * Gets the {@link com.jagrosh.jdautilities.command.Command#userPermissions Command.userPermissions} for the Command.
      *
-     * @return The userPermissions for the Command
+     * @return The userPermissions for the command
      */
     public Permission[] getUserPermissions()
     {
@@ -545,7 +556,7 @@ public abstract class Command
     /**
      * Gets the {@link com.jagrosh.jdautilities.command.Command#botPermissions Command.botPermissions} for the Command.
      *
-     * @return The botPermissions for the Command
+     * @return The botPermissions for the command
      */
     public Permission[] getBotPermissions()
     {
