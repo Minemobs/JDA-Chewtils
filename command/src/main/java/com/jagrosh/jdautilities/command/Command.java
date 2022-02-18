@@ -671,40 +671,37 @@ public abstract class Command
 
     private String getTranslatedString(String key, CommandEvent e) {
         try {
-            Class<?> clazz = Class.forName("fr.noalegeek.pepite_dor_bot.utils.MessageHelper");
-            Method m = clazz.getMethod("translateMessage", String.class, CommandEvent.class);
-            return (String) m.invoke(null, key, e);
+            return (String) Class.forName("fr.noalegeek.pepite_dor_bot.utils.MessageHelper").getMethod("translateMessage", String.class, CommandEvent.class).invoke(null, key, e);
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
             ex.printStackTrace();
             return key;
         }
     }
 
-    private MessageEmbed isNotOwner(CommandEvent event) {
+    private MessageBuilder isNotOwner(CommandEvent event) {
         try {
-            return new EmbedBuilder()
+            return new MessageBuilder(EmbedBuilder()
                 .setColor(Color.RED)
                 .setFooter((String) messageHelper.getMethod("getTag", User.class).invoke(null, event.getAuthor()), event.getAuthor().getAvatarUrl() == null ?
                     event.getAuthor().getDefaultAvatarUrl() : event.getAuthor().getAvatarUrl())
                 .setTimestamp(Instant.now())
-                .setTitle(Class.forName("fr.noalegeek.pepite_dor_bot.utils.UnicodeCharacters").getField("crossMarkEmoji").get(null) + " " + getTranslatedString("error.commands.notOwner", event)).build();
+                .setTitle(Class.forName("fr.noalegeek.pepite_dor_bot.utils.UnicodeCharacters").getField("crossMarkEmoji").get(null) + " " + getTranslatedString("error.commands.notOwner", event))
+                .build()).build();
         } catch (IllegalAccessException | NoSuchMethodException | NoSuchFieldException | ClassNotFoundException | InvocationTargetException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private MessageEmbed getErrorMessage(Member member, CommandEvent event, Permission perm) {
+    private MessageBuilder getErrorMessage(Member member, CommandEvent event, Permission perm) {
         try {
-            Method getTag = messageHelper.getMethod("getTag", User.class);
-            EmbedBuilder errorHasNotPermissionEmbed = new EmbedBuilder()
+            return new MessageBuilder(new EmbedBuilder()
                 .setColor(Color.RED)
-                .setFooter((String) getTag.invoke(null, event.getAuthor()), event.getAuthor().getAvatarUrl() == null ? event.getAuthor().getDefaultAvatarUrl() :
-                    event.getAuthor().getAvatarUrl())
+                .setFooter((String) messageHelper.getMethod("getTag", User.class).invoke(null, event.getAuthor()), event.getAuthor().getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())
                 .setTitle(member.getUser().isBot() ? getTranslatedString("error.commands.botHasNotPermission", event) :
-                    getTranslatedString("error.commands.userHasNotPermission", event), perm.getName());
-            return errorHasNotPermissionEmbed.build();
+                    getTranslatedString("error.commands.userHasNotPermission", event), perm.getName()
+                .build()).build();
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }
