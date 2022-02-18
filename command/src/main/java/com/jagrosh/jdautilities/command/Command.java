@@ -686,7 +686,7 @@ public abstract class Command
                     event.getAuthor().getDefaultAvatarUrl() : event.getAuthor().getAvatarUrl())
                 .setTimestamp(Instant.now())
                 .setTitle(Class.forName("fr.noalegeek.pepite_dor_bot.utils.UnicodeCharacters").getField("crossMarkEmoji").get(null) + " " + getTranslatedString("error.commands.notOwner", event))
-                .build()).build();
+                .build()).build());
         } catch (IllegalAccessException | NoSuchMethodException | NoSuchFieldException | ClassNotFoundException | InvocationTargetException e) {
             e.printStackTrace();
             return null;
@@ -701,7 +701,7 @@ public abstract class Command
                 .setTimestamp(Instant.now())
                 .setTitle(member.getUser().isBot() ? getTranslatedString("error.commands.botHasNotPermission", event) :
                     getTranslatedString("error.commands.userHasNotPermission", event), perm.getName()
-                .build()).build();
+                .build()).build());
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }
