@@ -18,6 +18,7 @@ package com.jagrosh.jdautilities.command;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.MessageBuilder;
 
 import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
@@ -680,7 +681,7 @@ public abstract class Command
 
     private Message isNotOwner(CommandEvent event) {
         try {
-            return new MessageBuilder(EmbedBuilder()
+            return new MessageBuilder(new EmbedBuilder()
                 .setColor(Color.RED)
                 .setFooter((String) messageHelper.getMethod("getTag", User.class).invoke(null, event.getAuthor()), event.getAuthor().getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())
