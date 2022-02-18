@@ -682,8 +682,7 @@ public abstract class Command
         try {
             return new MessageBuilder(EmbedBuilder()
                 .setColor(Color.RED)
-                .setFooter((String) messageHelper.getMethod("getTag", User.class).invoke(null, event.getAuthor()), event.getAuthor().getAvatarUrl() == null ?
-                    event.getAuthor().getDefaultAvatarUrl() : event.getAuthor().getAvatarUrl())
+                .setFooter((String) messageHelper.getMethod("getTag", User.class).invoke(null, event.getAuthor()), event.getAuthor().getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())
                 .setTitle(Class.forName("fr.noalegeek.pepite_dor_bot.utils.UnicodeCharacters").getField("crossMarkEmoji").get(null) + " " + getTranslatedString("error.commands.notOwner", event))
                 .build()).build();
@@ -699,8 +698,7 @@ public abstract class Command
                 .setColor(Color.RED)
                 .setFooter((String) messageHelper.getMethod("getTag", User.class).invoke(null, event.getAuthor()), event.getAuthor().getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())
-                .setTitle(member.getUser().isBot() ? getTranslatedString("error.commands.botHasNotPermission", event) :
-                    getTranslatedString("error.commands.userHasNotPermission", event), perm.getName()
+                .setTitle(member.getUser().isBot() ? getTranslatedString("error.commands.botHasNotPermission", event) : getTranslatedString("error.commands.userHasNotPermission", event), perm.getName())
                 .build()).build();
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
