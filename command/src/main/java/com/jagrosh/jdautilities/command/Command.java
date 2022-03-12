@@ -236,7 +236,7 @@ public abstract class Command
     {
         if(messageHelper == null) {
             try {
-                messageHelper = Class.forName("fr.noalegeek.pepite_dor_bot.utils.MessageHelper");
+                messageHelper = Class.forName("net.thesimpleteam.simplebot.utils.MessageHelper");
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
