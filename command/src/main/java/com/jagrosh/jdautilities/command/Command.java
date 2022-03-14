@@ -672,7 +672,7 @@ public abstract class Command
 
     private String getTranslatedString(String key, CommandEvent e) {
         try {
-            return (String) Class.forName("fr.noalegeek.pepite_dor_bot.utils.MessageHelper").getMethod("translateMessage", String.class, CommandEvent.class).invoke(null, key, e);
+            return (String) Class.forName("net.thesimpleteam.simplebot.utils.MessageHelper").getMethod("translateMessage", String.class, CommandEvent.class).invoke(null, key, e);
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
             ex.printStackTrace();
             return key;
@@ -685,7 +685,7 @@ public abstract class Command
                 .setColor(Color.RED)
                 .setFooter((String) messageHelper.getMethod("getTag", User.class).invoke(null, event.getAuthor()), event.getAuthor().getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())
-                .setTitle(Class.forName("fr.noalegeek.pepite_dor_bot.utils.UnicodeCharacters").getField("crossMarkEmoji").get(null) + " " + getTranslatedString("error.commands.notOwner", event))
+                .setTitle(Class.forName("net.thesimpleteam.simplebot.utils.UnicodeCharacters").getField("crossMarkEmoji").get(null) + " " + getTranslatedString("error.commands.notOwner", event))
                 .build()).build();
         } catch (IllegalAccessException | NoSuchMethodException | NoSuchFieldException | ClassNotFoundException | InvocationTargetException e) {
             e.printStackTrace();
